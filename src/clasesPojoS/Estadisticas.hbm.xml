@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 04-ene-2017 16:12:13 by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+  <class catalog="baloncesto" name="clasesPojoS.Estadisticas" optimistic-lock="version" table="estadisticas">
+    <composite-id class="clasesPojoS.EstadisticasId" name="id">
+      <key-property name="temporada" type="string">
+        <column length="5" name="temporada"/>
+      </key-property>
+      <key-property name="jugador" type="int">
+        <column name="jugador"/>
+      </key-property>
+    </composite-id>
+    <many-to-one class="clasesPojoS.Jugadores" fetch="select" insert="false" name="jugadores" update="false">
+      <column name="jugador" not-null="true"/>
+    </many-to-one>
+    <property name="puntosPorPartido" type="big_decimal">
+      <column name="Puntos_por_partido" precision="5"/>
+    </property>
+    <property name="asistenciasPorPartido" type="big_decimal">
+      <column name="Asistencias_por_partido" precision="5"/>
+    </property>
+    <property name="taponesPorPartido" type="big_decimal">
+      <column name="Tapones_por_partido" precision="5"/>
+    </property>
+    <property name="rebotesPorPartido" type="big_decimal">
+      <column name="Rebotes_por_partido" precision="5"/>
+    </property>
+  </class>
+</hibernate-mapping>

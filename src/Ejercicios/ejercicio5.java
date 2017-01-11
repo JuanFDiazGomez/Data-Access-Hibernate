@@ -40,8 +40,6 @@ public class ejercicio5 {
             sesionCreada.close();
             }catch(ObjectNotFoundException onfe){
                 System.out.println("El jugador introducido no existe");
-            }finally{
-                
             }
         }else{
             System.out.println("Ha de indicar el número en la ejecución");

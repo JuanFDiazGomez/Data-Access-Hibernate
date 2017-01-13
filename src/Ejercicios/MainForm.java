@@ -7,10 +7,13 @@ package Ejercicios;
 
 import clasesPojoS.Equipos;
 import clasesPojoS.Estadisticas;
+import clasesPojoS.EstadisticasId;
 import clasesPojoS.Jugadores;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
@@ -46,8 +49,6 @@ public class MainForm extends javax.swing.JFrame {
         jbtnJugadores = new javax.swing.JButton();
         jbtnEquipos = new javax.swing.JButton();
         jpJugadores = new javax.swing.JPanel();
-        jtpJugadores = new javax.swing.JTabbedPane();
-        jpInfoJugadores = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtInfoEstadisticas = new javax.swing.JTable();
         jtfCodigoJugador = new javax.swing.JTextField();
@@ -59,9 +60,11 @@ public class MainForm extends javax.swing.JFrame {
         jlInfoEquipo = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jlNumeroRegistros = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jpInsertarInfo = new javax.swing.JPanel();
+        jbtnInsertarEstadisticas = new javax.swing.JButton();
+        jbtnAceptarInsertar = new javax.swing.JButton();
+        jbtnAgregarFila = new javax.swing.JButton();
+        jbtnCancelar = new javax.swing.JButton();
+        jbtnEliminarFila = new javax.swing.JButton();
         jpEquipos = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jtaInformacionEquipos = new javax.swing.JTextArea();
@@ -116,7 +119,7 @@ public class MainForm extends javax.swing.JFrame {
                 .addComponent(jlTituloPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jlIntroduccion)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 181, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 171, Short.MAX_VALUE)
                 .addGroup(jpMenuPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jbtnEquipos, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jbtnJugadores, javax.swing.GroupLayout.Alignment.TRAILING))
@@ -125,6 +128,10 @@ public class MainForm extends javax.swing.JFrame {
 
         jtpPrincipal.addTab("Menu Principal", jpMenuPrincipal);
 
+        jScrollPane1.setBackground(new java.awt.Color(204, 204, 204));
+        jScrollPane1.setBorder(null);
+
+        jtInfoEstadisticas.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jtInfoEstadisticas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
@@ -139,8 +146,8 @@ public class MainForm extends javax.swing.JFrame {
             }
         ));
         jtInfoEstadisticas.setEnabled(false);
-        jtInfoEstadisticas.setFillsViewportHeight(true);
         jtInfoEstadisticas.setFocusable(false);
+        jtInfoEstadisticas.setGridColor(new java.awt.Color(204, 204, 255));
         jScrollPane1.setViewportView(jtInfoEstadisticas);
 
         jtfCodigoJugador.setText("Introduce el codigo del jugador");
@@ -164,107 +171,127 @@ public class MainForm extends javax.swing.JFrame {
 
         jLabel4.setText("Numero de registros: ");
 
-        jButton1.setText("Insertar");
+        jbtnInsertarEstadisticas.setText("Insertar");
+        jbtnInsertarEstadisticas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnInsertarEstadisticasActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Aceptar");
+        jbtnAceptarInsertar.setText("Aceptar");
+        jbtnAceptarInsertar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnAceptarInsertarActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jpInfoJugadoresLayout = new javax.swing.GroupLayout(jpInfoJugadores);
-        jpInfoJugadores.setLayout(jpInfoJugadoresLayout);
-        jpInfoJugadoresLayout.setHorizontalGroup(
-            jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpInfoJugadoresLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jpInfoJugadoresLayout.createSequentialGroup()
-                        .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jpInfoJugadoresLayout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jlNumeroRegistros))
-                            .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(jpInfoJugadoresLayout.createSequentialGroup()
-                                    .addComponent(jlDatosJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(jtfCodigoJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(jpInfoJugadoresLayout.createSequentialGroup()
-                                    .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jlInfoEquipo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jlInfoNombre, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addGap(18, 18, 18)
-                        .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
-                            .addComponent(jbtnBuscar))
-                        .addGap(7, 7, 7)))
-                .addContainerGap())
-        );
+        jbtnAgregarFila.setText("Agregar fila");
+        jbtnAgregarFila.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnAgregarFilaActionPerformed(evt);
+            }
+        });
 
-        jpInfoJugadoresLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton1, jbtnBuscar});
+        jbtnCancelar.setText("Cancelar");
 
-        jpInfoJugadoresLayout.setVerticalGroup(
-            jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpInfoJugadoresLayout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jpInfoJugadoresLayout.createSequentialGroup()
-                        .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jtfCodigoJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlDatosJugador))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlInfoNombre))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlInfoEquipo)))
-                    .addGroup(jpInfoJugadoresLayout.createSequentialGroup()
-                        .addComponent(jbtnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jpInfoJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jlNumeroRegistros))
-                .addGap(43, 43, 43)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        jpInfoJugadoresLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButton1, jbtnBuscar});
-
-        jtpJugadores.addTab("Buscar Estadisticas", jpInfoJugadores);
-
-        javax.swing.GroupLayout jpInsertarInfoLayout = new javax.swing.GroupLayout(jpInsertarInfo);
-        jpInsertarInfo.setLayout(jpInsertarInfoLayout);
-        jpInsertarInfoLayout.setHorizontalGroup(
-            jpInsertarInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 614, Short.MAX_VALUE)
-        );
-        jpInsertarInfoLayout.setVerticalGroup(
-            jpInsertarInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 411, Short.MAX_VALUE)
-        );
-
-        jtpJugadores.addTab("Insertar Nuevas Estadisticas", jpInsertarInfo);
+        jbtnEliminarFila.setText("Eliminar fila");
+        jbtnEliminarFila.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnEliminarFilaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jpJugadoresLayout = new javax.swing.GroupLayout(jpJugadores);
         jpJugadores.setLayout(jpJugadoresLayout);
         jpJugadoresLayout.setHorizontalGroup(
             jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jtpJugadores)
+            .addGroup(jpJugadoresLayout.createSequentialGroup()
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jpJugadoresLayout.createSequentialGroup()
+                        .addGap(14, 14, 14)
+                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jpJugadoresLayout.createSequentialGroup()
+                                    .addComponent(jLabel4)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(jlNumeroRegistros)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jbtnEliminarFila, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jbtnAgregarFila, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jpJugadoresLayout.createSequentialGroup()
+                                    .addComponent(jbtnAceptarInsertar, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(124, 124, 124)
+                                    .addComponent(jbtnCancelar)))
+                            .addGroup(jpJugadoresLayout.createSequentialGroup()
+                                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addGroup(jpJugadoresLayout.createSequentialGroup()
+                                        .addComponent(jlDatosJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jtfCodigoJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jpJugadoresLayout.createSequentialGroup()
+                                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jlInfoEquipo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jlInfoNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(28, 28, 28)
+                                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jbtnBuscar, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jbtnInsertarEstadisticas, javax.swing.GroupLayout.Alignment.TRAILING)))))
+                    .addGroup(jpJugadoresLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1)))
+                .addContainerGap())
         );
+
+        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jbtnBuscar, jbtnInsertarEstadisticas});
+
+        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jbtnAceptarInsertar, jbtnCancelar});
+
         jpJugadoresLayout.setVerticalGroup(
             jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jtpJugadores)
+            .addGroup(jpJugadoresLayout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jpJugadoresLayout.createSequentialGroup()
+                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jtfCodigoJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jlDatosJugador))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jlInfoNombre))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jlInfoEquipo)))
+                    .addGroup(jpJugadoresLayout.createSequentialGroup()
+                        .addComponent(jbtnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbtnInsertarEstadisticas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(11, 11, 11)
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel4)
+                        .addComponent(jlNumeroRegistros))
+                    .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jbtnAgregarFila)
+                        .addComponent(jbtnEliminarFila)))
+                .addGap(58, 58, 58)
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jbtnAceptarInsertar, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jbtnCancelar))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
+
+        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jbtnBuscar, jbtnInsertarEstadisticas});
+
+        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jbtnAceptarInsertar, jbtnCancelar});
 
         jtpPrincipal.addTab("Jugadores", jpJugadores);
 
@@ -323,7 +350,6 @@ public class MainForm extends javax.swing.JFrame {
 
     private void jbtnJugadoresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnJugadoresActionPerformed
         jtpPrincipal.setSelectedComponent(jpJugadores);
-        jtpJugadores.setSelectedComponent(jpInfoJugadores);
     }//GEN-LAST:event_jbtnJugadoresActionPerformed
 
     private void jbtnEquiposActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnEquiposActionPerformed
@@ -411,31 +437,106 @@ public class MainForm extends javax.swing.JFrame {
                 jtfNombreJugador.setText(jugador.getNombre());
                 jtfEquipo.setText(jugador.getEquipos().getNombre());
                 Set<Estadisticas> estadisticas = jugador.getEstadisticases();
-                DefaultTableModel dftm = (DefaultTableModel)jtInfoEstadisticas.getModel();
+                DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
                 dftm.setNumRows(estadisticas.size());
                 jtInfoEstadisticas.setModel(dftm);
                 int row = 0;
                 for (Iterator it = estadisticas.iterator(); it.hasNext(); row++) {
                     Estadisticas estadistica = (Estadisticas) it.next();
-                    jtInfoEstadisticas.setValueAt(estadistica.getId().getTemporada(),row, 0);
-                    jtInfoEstadisticas.setValueAt(estadistica.getPuntosPorPartido(),row, 1);
-                    jtInfoEstadisticas.setValueAt(estadistica.getAsistenciasPorPartido(),row, 2);
-                    jtInfoEstadisticas.setValueAt(estadistica.getTaponesPorPartido(),row, 3);
-                    jtInfoEstadisticas.setValueAt(estadistica.getRebotesPorPartido(),row, 4);
+                    jtInfoEstadisticas.setValueAt(estadistica.getId().getTemporada(), row, 0);
+                    jtInfoEstadisticas.setValueAt(estadistica.getPuntosPorPartido(), row, 1);
+                    jtInfoEstadisticas.setValueAt(estadistica.getAsistenciasPorPartido(), row, 2);
+                    jtInfoEstadisticas.setValueAt(estadistica.getTaponesPorPartido(), row, 3);
+                    jtInfoEstadisticas.setValueAt(estadistica.getRebotesPorPartido(), row, 4);
                 }
                 jlNumeroRegistros.setText(String.valueOf(estadisticas.size()));
                 sesionCreada.close();
             } catch (ObjectNotFoundException onfe) {
                 System.out.println("El jugador introducido no existe");
             }
-        }else{
-                
+        } else {
+
         }
     }//GEN-LAST:event_jbtnBuscarActionPerformed
 
+    private void jbtnInsertarEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnInsertarEstadisticasActionPerformed
+        if (!jtfNombreJugador.getText().isEmpty()) {
+            String texto = "¿Desea introducir nuevas estadisticas para el codigo de jugador introducido?";
+            if (JOptionPane.showConfirmDialog(
+                    jpJugadores, texto, "Confirmar Jugador", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                jtfCodigoJugador.setText("");
+                jtfNombreJugador.setText("");
+                jtfEquipo.setText("");
+            }
+        }
+        jbtnAceptarInsertar.setVisible(Boolean.TRUE);
+        jbtnCancelar.setVisible(Boolean.TRUE);
+        jbtnAgregarFila.setVisible(Boolean.TRUE);
+        jbtnBuscar.setVisible(Boolean.FALSE);
+        jbtnInsertarEstadisticas.setVisible(Boolean.FALSE);
+        DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
+        dftm.setNumRows(1);
+        jtInfoEstadisticas.setModel(dftm);
+        jtInfoEstadisticas.setEnabled(Boolean.TRUE);
+
+    }//GEN-LAST:event_jbtnInsertarEstadisticasActionPerformed
+
+    private void jbtnAgregarFilaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAgregarFilaActionPerformed
+        DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
+        dftm.setNumRows(dftm.getRowCount() + 1);
+        jtInfoEstadisticas.setModel(dftm);
+    }//GEN-LAST:event_jbtnAgregarFilaActionPerformed
+
+    private void jbtnAceptarInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAceptarInsertarActionPerformed
+        if (jtfCodigoJugador.getText().length() > 0) {
+            SessionFactory sesion = NewHibernateUtil.getSessionFactory();
+            Session sesionCreada = sesion.openSession();
+            Jugadores jugador = (Jugadores) sesionCreada.load(
+                    Jugadores.class,
+                    Integer.parseInt(jtfCodigoJugador.getText())
+            );
+            DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
+
+            for (int i = 0; i < jtInfoEstadisticas.getRowCount(); i++) {
+                String temporada = (String) jtInfoEstadisticas.getValueAt(i, 0);
+                if (temporada != null) {
+                    String puntos = (String) jtInfoEstadisticas.getValueAt(i, 1);
+                    String asistencias = (String) jtInfoEstadisticas.getValueAt(i, 2);
+                    String tapones = (String) jtInfoEstadisticas.getValueAt(i, 3);
+                    String rebotes = (String) jtInfoEstadisticas.getValueAt(i, 4);
+                    sesionCreada.save(new Estadisticas(
+                            new EstadisticasId(temporada, jugador.getCodigo()),
+                            jugador,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO, 
+                            BigDecimal.ZERO, 
+                            BigDecimal.ZERO)
+                    );
+
+                } else {
+                    JOptionPane.showMessageDialog(jpJugadores,
+                            "Error: En la fila " + (i + 1) + " no ha introducido la temproda,\n"
+                            + "Por lo tanto esa fila no sera insertada en la base de datos");
+                }
+
+            }
+        }
+    }//GEN-LAST:event_jbtnAceptarInsertarActionPerformed
+
+    private void jbtnEliminarFilaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnEliminarFilaActionPerformed
+        if (jtInfoEstadisticas.getEditingRow()!=jtInfoEstadisticas.getRowCount()-1) {
+            DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
+            dftm.setNumRows(dftm.getRowCount() - 1);
+            jtInfoEstadisticas.setModel(dftm);
+        }else{
+            JOptionPane.showMessageDialog(jpJugadores, "No puede borrar la fila que esta editando");
+        }
+
+    }//GEN-LAST:event_jbtnEliminarFilaActionPerformed
+
     /**
-         * @param args the command line arguments
-         */
+     * @param args the command line arguments
+     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -469,14 +570,17 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton jbtnAceptarInsertar;
+    private javax.swing.JButton jbtnAgregarFila;
     private javax.swing.JButton jbtnBuscar;
+    private javax.swing.JButton jbtnCancelar;
+    private javax.swing.JButton jbtnEliminarFila;
     private javax.swing.JButton jbtnEquipos;
+    private javax.swing.JButton jbtnInsertarEstadisticas;
     private javax.swing.JButton jbtnJugadores;
     private javax.swing.JLabel jlDatosJugador;
     private javax.swing.JLabel jlInfoEquipo;
@@ -485,8 +589,6 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JLabel jlNumeroRegistros;
     private javax.swing.JLabel jlTituloPrincipal;
     private javax.swing.JPanel jpEquipos;
-    private javax.swing.JPanel jpInfoJugadores;
-    private javax.swing.JPanel jpInsertarInfo;
     private javax.swing.JPanel jpJugadores;
     private javax.swing.JPanel jpMenuPrincipal;
     private javax.swing.JTable jtInfoEstadisticas;
@@ -494,7 +596,6 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JTextField jtfCodigoJugador;
     private javax.swing.JTextField jtfEquipo;
     private javax.swing.JTextField jtfNombreJugador;
-    private javax.swing.JTabbedPane jtpJugadores;
     private javax.swing.JTabbedPane jtpPrincipal;
     // End of variables declaration//GEN-END:variables
 }

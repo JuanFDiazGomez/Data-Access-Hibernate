@@ -13,12 +13,15 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  *
@@ -26,11 +29,15 @@ import org.hibernate.SessionFactory;
  */
 public class MainForm extends javax.swing.JFrame {
 
+    SessionFactory sesion;
+
     /**
      * Creates new form MainForm
      */
     public MainForm() {
         initComponents();
+
+        sesion = NewHibernateUtil.getSessionFactory();
     }
 
     /**
@@ -48,6 +55,7 @@ public class MainForm extends javax.swing.JFrame {
         jlIntroduccion = new javax.swing.JLabel();
         jbtnJugadores = new javax.swing.JButton();
         jbtnEquipos = new javax.swing.JButton();
+        jbtnInsertarEstadisticas = new javax.swing.JButton();
         jpJugadores = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtInfoEstadisticas = new javax.swing.JTable();
@@ -60,11 +68,23 @@ public class MainForm extends javax.swing.JFrame {
         jlInfoEquipo = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jlNumeroRegistros = new javax.swing.JLabel();
-        jbtnInsertarEstadisticas = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        jpInsertarEstadisticas = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jcbJugadores = new javax.swing.JComboBox<>();
+        jtfTemporada = new javax.swing.JTextField();
+        jtfPuntos = new javax.swing.JTextField();
+        jtfAsistencias = new javax.swing.JTextField();
+        jtfRebotes = new javax.swing.JTextField();
+        jtfTapones = new javax.swing.JTextField();
         jbtnAceptarInsertar = new javax.swing.JButton();
-        jbtnAgregarFila = new javax.swing.JButton();
-        jbtnCancelar = new javax.swing.JButton();
-        jbtnEliminarFila = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         jpEquipos = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jtaInformacionEquipos = new javax.swing.JTextArea();
@@ -95,6 +115,13 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        jbtnInsertarEstadisticas.setText("Insertar Estadisticas");
+        jbtnInsertarEstadisticas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnInsertarEstadisticasActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jpMenuPrincipalLayout = new javax.swing.GroupLayout(jpMenuPrincipal);
         jpMenuPrincipal.setLayout(jpMenuPrincipalLayout);
         jpMenuPrincipalLayout.setHorizontalGroup(
@@ -106,7 +133,9 @@ public class MainForm extends javax.swing.JFrame {
                     .addComponent(jlTituloPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jpMenuPrincipalLayout.createSequentialGroup()
                         .addGap(60, 60, 60)
-                        .addComponent(jbtnJugadores, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jpMenuPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jbtnInsertarEstadisticas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jbtnJugadores, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                         .addComponent(jbtnEquipos, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(60, 60, 60)))
@@ -119,11 +148,14 @@ public class MainForm extends javax.swing.JFrame {
                 .addComponent(jlTituloPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jlIntroduccion)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 171, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
                 .addGroup(jpMenuPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jbtnEquipos, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jbtnJugadores, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(105, 105, 105))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpMenuPrincipalLayout.createSequentialGroup()
+                        .addComponent(jbtnJugadores)
+                        .addGap(18, 18, 18)
+                        .addComponent(jbtnInsertarEstadisticas))
+                    .addComponent(jbtnEquipos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(62, 62, 62))
         );
 
         jtpPrincipal.addTab("Menu Principal", jpMenuPrincipal);
@@ -144,13 +176,19 @@ public class MainForm extends javax.swing.JFrame {
             new String [] {
                 "Temporada", "Puntos", "Asistencias", "Tapones", "Rebotes"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jtInfoEstadisticas.setEnabled(false);
         jtInfoEstadisticas.setFocusable(false);
         jtInfoEstadisticas.setGridColor(new java.awt.Color(204, 204, 255));
         jScrollPane1.setViewportView(jtInfoEstadisticas);
-
-        jtfCodigoJugador.setText("Introduce el codigo del jugador");
 
         jtfNombreJugador.setEditable(false);
 
@@ -163,7 +201,7 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
-        jlDatosJugador.setText("DATOS DEL JUGADOR:");
+        jlDatosJugador.setText("Codigo:");
 
         jlInfoNombre.setText("Nombre:");
 
@@ -171,35 +209,8 @@ public class MainForm extends javax.swing.JFrame {
 
         jLabel4.setText("Numero de registros: ");
 
-        jbtnInsertarEstadisticas.setText("Insertar");
-        jbtnInsertarEstadisticas.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnInsertarEstadisticasActionPerformed(evt);
-            }
-        });
-
-        jbtnAceptarInsertar.setText("Aceptar");
-        jbtnAceptarInsertar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnAceptarInsertarActionPerformed(evt);
-            }
-        });
-
-        jbtnAgregarFila.setText("Agregar fila");
-        jbtnAgregarFila.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnAgregarFilaActionPerformed(evt);
-            }
-        });
-
-        jbtnCancelar.setText("Cancelar");
-
-        jbtnEliminarFila.setText("Eliminar fila");
-        jbtnEliminarFila.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnEliminarFilaActionPerformed(evt);
-            }
-        });
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel10.setText("Datos del jugador");
 
         javax.swing.GroupLayout jpJugadoresLayout = new javax.swing.GroupLayout(jpJugadores);
         jpJugadores.setLayout(jpJugadoresLayout);
@@ -208,21 +219,15 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(jpJugadoresLayout.createSequentialGroup()
                 .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jpJugadoresLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1))
+                    .addGroup(jpJugadoresLayout.createSequentialGroup()
                         .addGap(14, 14, 14)
                         .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addGroup(jpJugadoresLayout.createSequentialGroup()
-                                    .addComponent(jLabel4)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(jlNumeroRegistros)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jbtnEliminarFila, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jbtnAgregarFila, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(jpJugadoresLayout.createSequentialGroup()
-                                    .addComponent(jbtnAceptarInsertar, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(124, 124, 124)
-                                    .addComponent(jbtnCancelar)))
+                            .addGroup(jpJugadoresLayout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jlNumeroRegistros))
                             .addGroup(jpJugadoresLayout.createSequentialGroup()
                                 .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addGroup(jpJugadoresLayout.createSequentialGroup()
@@ -238,62 +243,162 @@ public class MainForm extends javax.swing.JFrame {
                                             .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
                                             .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                 .addGap(28, 28, 28)
-                                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jbtnBuscar, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jbtnInsertarEstadisticas, javax.swing.GroupLayout.Alignment.TRAILING)))))
-                    .addGroup(jpJugadoresLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1)))
+                                .addComponent(jbtnBuscar)))
+                        .addGap(0, 9, Short.MAX_VALUE))
+                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-
-        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jbtnBuscar, jbtnInsertarEstadisticas});
-
-        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jbtnAceptarInsertar, jbtnCancelar});
-
         jpJugadoresLayout.setVerticalGroup(
             jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jpJugadoresLayout.createSequentialGroup()
-                .addGap(32, 32, 32)
-                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jpJugadoresLayout.createSequentialGroup()
-                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jtfCodigoJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlDatosJugador))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlInfoNombre))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlInfoEquipo)))
-                    .addGroup(jpJugadoresLayout.createSequentialGroup()
-                        .addComponent(jbtnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jbtnInsertarEstadisticas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGap(18, 18, 18)
+                .addGap(8, 8, 8)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jtfCodigoJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jlDatosJugador)
+                    .addComponent(jbtnBuscar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jtfEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jlInfoNombre))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jtfNombreJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jlInfoEquipo))
+                .addGap(23, 23, 23)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(11, 11, 11)
-                .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel4)
-                        .addComponent(jlNumeroRegistros))
-                    .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jbtnAgregarFila)
-                        .addComponent(jbtnEliminarFila)))
-                .addGap(58, 58, 58)
                 .addGroup(jpJugadoresLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jbtnAceptarInsertar, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jbtnCancelar))
-                .addContainerGap(27, Short.MAX_VALUE))
+                    .addComponent(jLabel4)
+                    .addComponent(jlNumeroRegistros))
+                .addContainerGap(55, Short.MAX_VALUE))
         );
 
-        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jbtnBuscar, jbtnInsertarEstadisticas});
-
-        jpJugadoresLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jbtnAceptarInsertar, jbtnCancelar});
-
         jtpPrincipal.addTab("Jugadores", jpJugadores);
+
+        jpInsertarEstadisticas.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                jpInsertarEstadisticasComponentShown(evt);
+            }
+        });
+
+        jLabel2.setText("Jugador");
+
+        jLabel3.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("Insertar nuevas estadisticas");
+
+        jLabel5.setText("Tapones");
+
+        jLabel6.setText("Puntos");
+
+        jLabel7.setText("Asistencias");
+
+        jLabel8.setText("Rebotes");
+
+        jLabel9.setText("Temporada");
+
+        jtfTemporada.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jtfPuntos.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jtfAsistencias.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jtfRebotes.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jtfTapones.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jbtnAceptarInsertar.setText("Aceptar");
+        jbtnAceptarInsertar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnAceptarInsertarActionPerformed(evt);
+            }
+        });
+
+        jButton1.setText("Limpiar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jpInsertarEstadisticasLayout = new javax.swing.GroupLayout(jpInsertarEstadisticas);
+        jpInsertarEstadisticas.setLayout(jpInsertarEstadisticasLayout);
+        jpInsertarEstadisticasLayout.setHorizontalGroup(
+            jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpInsertarEstadisticasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jpInsertarEstadisticasLayout.createSequentialGroup()
+                        .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(49, 49, 49)
+                        .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jpInsertarEstadisticasLayout.createSequentialGroup()
+                                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jtfPuntos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jtfAsistencias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jtfRebotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jtfTapones, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jcbJugadores, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jtfTemporada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(125, 125, 125)
+                        .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jbtnAceptarInsertar)
+                            .addComponent(jButton1))
+                        .addGap(19, 19, 19)))
+                .addContainerGap())
+        );
+
+        jpInsertarEstadisticasLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jcbJugadores, jtfAsistencias, jtfPuntos, jtfRebotes, jtfTapones, jtfTemporada});
+
+        jpInsertarEstadisticasLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton1, jbtnAceptarInsertar});
+
+        jpInsertarEstadisticasLayout.setVerticalGroup(
+            jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpInsertarEstadisticasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(33, 33, 33)
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jcbJugadores, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(jtfTemporada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jbtnAceptarInsertar))
+                .addGap(18, 18, 18)
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(jtfPuntos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
+                .addGap(18, 18, 18)
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jtfAsistencias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(jtfRebotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jpInsertarEstadisticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jtfTapones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
+        );
+
+        jpInsertarEstadisticasLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel5, jcbJugadores, jtfAsistencias, jtfPuntos, jtfRebotes, jtfTapones, jtfTemporada});
+
+        jtpPrincipal.addTab("Insertar Estadisticas", jpInsertarEstadisticas);
 
         jpEquipos.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -327,8 +432,8 @@ public class MainForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(97, 97, 97))
         );
 
         jtpPrincipal.addTab("Equipos", jpEquipos);
@@ -341,56 +446,14 @@ public class MainForm extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jtpPrincipal)
+            .addComponent(jtpPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 369, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jbtnJugadoresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnJugadoresActionPerformed
-        jtpPrincipal.setSelectedComponent(jpJugadores);
-    }//GEN-LAST:event_jbtnJugadoresActionPerformed
-
-    private void jbtnEquiposActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnEquiposActionPerformed
-        jtpPrincipal.setSelectedComponent(jpEquipos);
-        SessionFactory sesion = NewHibernateUtil.getSessionFactory();
-        Session sesionCreada = sesion.openSession();
-        StringBuilder sb = new StringBuilder();
-        String s = System.getProperty("line.separator");
-        Query q = sesionCreada.createQuery("from Equipos");
-        List<Equipos> listaEquipos = q.list();
-        Iterator<Equipos> iteraEquipos = listaEquipos.iterator();
-        sb.append("Número de equipos: " + listaEquipos.size() + s);
-        while (iteraEquipos.hasNext()) {
-            sb.append("==============================================" + s);
-            Equipos equipo = iteraEquipos.next();
-            sb.append("Equipo: " + equipo.getNombre() + s);
-            for (Iterator<Jugadores> it = equipo.getJugadoreses().iterator(); it.hasNext();) {
-                Jugadores jugador = it.next();
-                String hql = "select avg(puntosPorPartido) "
-                        + "from Estadisticas e "
-                        + "where e.id.jugador = :codJugador";
-                q = sesionCreada.createQuery(hql);
-                q.setParameter("codJugador", jugador.getCodigo());
-                Double puntuacionMedia = (Double) q.uniqueResult();
-                if (puntuacionMedia == null) {
-                    puntuacionMedia = 0D;
-                }
-
-                sb.append(jugador.getCodigo() + ", "
-                        + jugador.getNombre() + ": "
-                        + puntuacionMedia.toString() + s);
-
-            }
-            sb.append(". . . . . . . . . . . . . . ." + s);
-        }
-        jtaInformacionEquipos.setText(sb.toString());
-        sesionCreada.close();
-    }//GEN-LAST:event_jbtnEquiposActionPerformed
-
     private void jpEquiposComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jpEquiposComponentShown
-        SessionFactory sesion = NewHibernateUtil.getSessionFactory();
         Session sesionCreada = sesion.openSession();
         StringBuilder sb = new StringBuilder();
         String s = System.getProperty("line.separator");
@@ -428,7 +491,6 @@ public class MainForm extends javax.swing.JFrame {
     private void jbtnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnBuscarActionPerformed
         if (jtfCodigoJugador.getText().length() > 0) {
             try {
-                SessionFactory sesion = NewHibernateUtil.getSessionFactory();
                 Session sesionCreada = sesion.openSession();
                 Jugadores jugador = (Jugadores) sesionCreada.load(
                         Jugadores.class,
@@ -452,87 +514,119 @@ public class MainForm extends javax.swing.JFrame {
                 jlNumeroRegistros.setText(String.valueOf(estadisticas.size()));
                 sesionCreada.close();
             } catch (ObjectNotFoundException onfe) {
-                System.out.println("El jugador introducido no existe");
+                JOptionPane.showMessageDialog(jpJugadores, "El jugador introducido no existe");
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(jpJugadores, "El codigo introducido no es valido");
             }
         } else {
-
+            JOptionPane.showMessageDialog(jpJugadores, "Introduce primero el codigo del jugador");
         }
     }//GEN-LAST:event_jbtnBuscarActionPerformed
 
-    private void jbtnInsertarEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnInsertarEstadisticasActionPerformed
-        if (!jtfNombreJugador.getText().isEmpty()) {
-            String texto = "¿Desea introducir nuevas estadisticas para el codigo de jugador introducido?";
-            if (JOptionPane.showConfirmDialog(
-                    jpJugadores, texto, "Confirmar Jugador", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
-                jtfCodigoJugador.setText("");
-                jtfNombreJugador.setText("");
-                jtfEquipo.setText("");
-            }
-        }
-        jbtnAceptarInsertar.setVisible(Boolean.TRUE);
-        jbtnCancelar.setVisible(Boolean.TRUE);
-        jbtnAgregarFila.setVisible(Boolean.TRUE);
-        jbtnBuscar.setVisible(Boolean.FALSE);
-        jbtnInsertarEstadisticas.setVisible(Boolean.FALSE);
-        DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
-        dftm.setNumRows(1);
-        jtInfoEstadisticas.setModel(dftm);
-        jtInfoEstadisticas.setEnabled(Boolean.TRUE);
-
-    }//GEN-LAST:event_jbtnInsertarEstadisticasActionPerformed
-
-    private void jbtnAgregarFilaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAgregarFilaActionPerformed
-        DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
-        dftm.setNumRows(dftm.getRowCount() + 1);
-        jtInfoEstadisticas.setModel(dftm);
-    }//GEN-LAST:event_jbtnAgregarFilaActionPerformed
-
-    private void jbtnAceptarInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAceptarInsertarActionPerformed
-        if (jtfCodigoJugador.getText().length() > 0) {
-            SessionFactory sesion = NewHibernateUtil.getSessionFactory();
-            Session sesionCreada = sesion.openSession();
-            Jugadores jugador = (Jugadores) sesionCreada.load(
-                    Jugadores.class,
-                    Integer.parseInt(jtfCodigoJugador.getText())
-            );
-            DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
-
-            for (int i = 0; i < jtInfoEstadisticas.getRowCount(); i++) {
-                String temporada = (String) jtInfoEstadisticas.getValueAt(i, 0);
-                if (temporada != null) {
-                    String puntos = (String) jtInfoEstadisticas.getValueAt(i, 1);
-                    String asistencias = (String) jtInfoEstadisticas.getValueAt(i, 2);
-                    String tapones = (String) jtInfoEstadisticas.getValueAt(i, 3);
-                    String rebotes = (String) jtInfoEstadisticas.getValueAt(i, 4);
-                    sesionCreada.save(new Estadisticas(
-                            new EstadisticasId(temporada, jugador.getCodigo()),
-                            jugador,
-                            BigDecimal.ZERO,
-                            BigDecimal.ZERO, 
-                            BigDecimal.ZERO, 
-                            BigDecimal.ZERO)
-                    );
-
-                } else {
-                    JOptionPane.showMessageDialog(jpJugadores,
-                            "Error: En la fila " + (i + 1) + " no ha introducido la temproda,\n"
-                            + "Por lo tanto esa fila no sera insertada en la base de datos");
+    private void jbtnEquiposActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnEquiposActionPerformed
+        jtpPrincipal.setSelectedComponent(jpEquipos);
+        Session sesionCreada = sesion.openSession();
+        StringBuilder sb = new StringBuilder();
+        String s = System.getProperty("line.separator");
+        Query q = sesionCreada.createQuery("from Equipos");
+        List<Equipos> listaEquipos = q.list();
+        Iterator<Equipos> iteraEquipos = listaEquipos.iterator();
+        sb.append("Número de equipos: " + listaEquipos.size() + s);
+        while (iteraEquipos.hasNext()) {
+            sb.append("==============================================" + s);
+            Equipos equipo = iteraEquipos.next();
+            sb.append("Equipo: " + equipo.getNombre() + s);
+            for (Iterator<Jugadores> it = equipo.getJugadoreses().iterator(); it.hasNext();) {
+                Jugadores jugador = it.next();
+                String hql = "select avg(puntosPorPartido) "
+                        + "from Estadisticas e "
+                        + "where e.id.jugador = :codJugador";
+                q = sesionCreada.createQuery(hql);
+                q.setParameter("codJugador", jugador.getCodigo());
+                Double puntuacionMedia = (Double) q.uniqueResult();
+                if (puntuacionMedia == null) {
+                    puntuacionMedia = 0D;
                 }
 
+                sb.append(jugador.getCodigo() + ", "
+                        + jugador.getNombre() + ": "
+                        + puntuacionMedia.toString() + s);
+
             }
+            sb.append(". . . . . . . . . . . . . . ." + s);
+        }
+        jtaInformacionEquipos.setText(sb.toString());
+        sesionCreada.close();
+    }//GEN-LAST:event_jbtnEquiposActionPerformed
+
+    private void jbtnJugadoresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnJugadoresActionPerformed
+        jtpPrincipal.setSelectedComponent(jpJugadores);
+    }//GEN-LAST:event_jbtnJugadoresActionPerformed
+
+    private void jbtnInsertarEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnInsertarEstadisticasActionPerformed
+        jtpPrincipal.setSelectedComponent(jpInsertarEstadisticas);
+    }//GEN-LAST:event_jbtnInsertarEstadisticasActionPerformed
+
+    private void jpInsertarEstadisticasComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jpInsertarEstadisticasComponentShown
+        try {
+            Session sesionCreada = sesion.openSession();
+            Query q = sesionCreada.createQuery("from Jugadores");
+
+            List<Jugadores> jugadores = q.list();
+            DefaultComboBoxModel<String> dcbm = (DefaultComboBoxModel<String>) jcbJugadores.getModel();
+            dcbm.addElement("Jugadores...");
+            for (Jugadores jugador : jugadores) {
+                dcbm.addElement(String.valueOf(jugador.getCodigo()) + " - " + jugador.getNombre());
+            }
+            jcbJugadores.setModel(dcbm);
+            sesionCreada.close();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(jpInsertarEstadisticas, "No hay jugadores aun en la base de datos");
+        }
+        limpiarEstadisticas();
+    }//GEN-LAST:event_jpInsertarEstadisticasComponentShown
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        limpiarEstadisticas();
+    }//GEN-LAST:event_jButton1ActionPerformed
+    
+    private void jbtnAceptarInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAceptarInsertarActionPerformed
+        if (jcbJugadores.getSelectedIndex() > 0) {
+            if (!jtfTemporada.getText().isEmpty()) {
+                Session sesionCreada = sesion.openSession();
+                try {
+                    Transaction tx = sesionCreada.beginTransaction();
+                    String jugadorSeleccionado = (String) jcbJugadores.getSelectedItem();
+                    int codigo = Integer.valueOf(
+                            jugadorSeleccionado.substring(0, jugadorSeleccionado.indexOf("-") - 1)
+                    );
+                    Jugadores jugador = (Jugadores) sesionCreada.load(Jugadores.class, codigo);
+
+                    sesionCreada.save(new Estadisticas(
+                            new EstadisticasId(jtfTemporada.getText(), codigo),
+                            jugador,
+                            comprobarEstadistica(jtfPuntos.getText()),
+                            comprobarEstadistica(jtfAsistencias.getText()),
+                            comprobarEstadistica(jtfTapones.getText()),
+                            comprobarEstadistica(jtfRebotes.getText())         
+                    ));
+
+                    tx.commit();
+                } catch (ConstraintViolationException cve) {
+                    JOptionPane.showMessageDialog(jpInsertarEstadisticas, "Ya existen esas estadisticas");
+                } catch (org.hibernate.exception.DataException de) {
+                    JOptionPane.showMessageDialog(jpInsertarEstadisticas, "No se han podido insertar esas estadisticas");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(jpInsertarEstadisticas, "No se han podido insertar esas estadisticas");
+                }
+                sesionCreada.close();
+            } else {
+                JOptionPane.showMessageDialog(jpInsertarEstadisticas, "Inserte la temporada");
+            }
+        } else {
+            JOptionPane.showMessageDialog(jpInsertarEstadisticas, "Seleccione jugador");
         }
     }//GEN-LAST:event_jbtnAceptarInsertarActionPerformed
-
-    private void jbtnEliminarFilaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnEliminarFilaActionPerformed
-        if (jtInfoEstadisticas.getEditingRow()!=jtInfoEstadisticas.getRowCount()-1) {
-            DefaultTableModel dftm = (DefaultTableModel) jtInfoEstadisticas.getModel();
-            dftm.setNumRows(dftm.getRowCount() - 1);
-            jtInfoEstadisticas.setModel(dftm);
-        }else{
-            JOptionPane.showMessageDialog(jpJugadores, "No puede borrar la fila que esta editando");
-        }
-
-    }//GEN-LAST:event_jbtnEliminarFilaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -570,18 +664,25 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton jbtnAceptarInsertar;
-    private javax.swing.JButton jbtnAgregarFila;
     private javax.swing.JButton jbtnBuscar;
-    private javax.swing.JButton jbtnCancelar;
-    private javax.swing.JButton jbtnEliminarFila;
     private javax.swing.JButton jbtnEquipos;
     private javax.swing.JButton jbtnInsertarEstadisticas;
     private javax.swing.JButton jbtnJugadores;
+    private javax.swing.JComboBox<String> jcbJugadores;
     private javax.swing.JLabel jlDatosJugador;
     private javax.swing.JLabel jlInfoEquipo;
     private javax.swing.JLabel jlInfoNombre;
@@ -589,13 +690,33 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JLabel jlNumeroRegistros;
     private javax.swing.JLabel jlTituloPrincipal;
     private javax.swing.JPanel jpEquipos;
+    private javax.swing.JPanel jpInsertarEstadisticas;
     private javax.swing.JPanel jpJugadores;
     private javax.swing.JPanel jpMenuPrincipal;
     private javax.swing.JTable jtInfoEstadisticas;
     private javax.swing.JTextArea jtaInformacionEquipos;
+    private javax.swing.JTextField jtfAsistencias;
     private javax.swing.JTextField jtfCodigoJugador;
     private javax.swing.JTextField jtfEquipo;
     private javax.swing.JTextField jtfNombreJugador;
+    private javax.swing.JTextField jtfPuntos;
+    private javax.swing.JTextField jtfRebotes;
+    private javax.swing.JTextField jtfTapones;
+    private javax.swing.JTextField jtfTemporada;
     private javax.swing.JTabbedPane jtpPrincipal;
     // End of variables declaration//GEN-END:variables
+
+    private void limpiarEstadisticas() {
+        jtfAsistencias.setText("");
+        jtfPuntos.setText("");
+        jtfRebotes.setText("");
+        jtfTemporada.setText("");
+        jtfTapones.setText("");
+        jcbJugadores.setSelectedIndex(0);
+    }
+    
+    private BigDecimal comprobarEstadistica(String valor){
+        return (!valor.isEmpty())
+                ? BigDecimal.valueOf(Double.valueOf(valor)):BigDecimal.valueOf(0F);
+    }
 }
